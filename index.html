@@ -49,14 +49,6 @@ button.act{font:600 16px Archivo,system-ui,sans-serif;padding:10px 16px;border-r
     <div class="chips" id="chips"></div>
   </details>
 
-  <details class="admin">
-    <summary>Actualizar datos</summary>
-    <p>Esta página lee el archivo telas.xlsx del mismo sitio (título en la columna A, ubicación en la columna B). Para actualizar a todos, sustituye ese archivo. “Cargar Excel” solo sirve para probar un archivo y no se guarda.</p>
-    <input id="file" type="file" accept=".xlsx,.xls,.csv" hidden>
-    <button class="act" id="up" type="button">Cargar Excel</button>
-    <button class="act" id="reset" type="button">Usar datos originales</button>
-    <p id="status"></p>
-  </details>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -80,7 +72,6 @@ function build() {
     b.onclick = () => setLoc(active === l ? null : l);
     $("chips").appendChild(b);
   });
-  $("status").textContent = "Telas cargadas: " + data.length + " (" + src + ")";
 }
 
 function setLoc(l) {
@@ -120,18 +111,6 @@ function parseRows(rows) {
 }
 const fromWb = wb => parseRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "" }));
 function use(d, s) { data = d; src = s; active = null; build(); render(); }
-
-$("up").onclick = () => $("file").click();
-$("file").onchange = async e => {
-  const f = e.target.files[0]; if (!f) return;
-  try {
-    const out = fromWb(XLSX.read(await f.arrayBuffer(), { type: "array" }));
-    if (!out.length) { $("status").textContent = "No se encontraron telas. Revisa que el título esté en la columna A y la ubicación en la B."; return; }
-    use(out, "archivo de prueba, no guardado");
-  } catch (err) { $("status").textContent = "No se pudo leer el archivo. Prueba a guardarlo de nuevo como .xlsx."; }
-  e.target.value = "";
-};
-$("reset").onclick = () => use(base[0], base[1]);
 
 build(); render();
 
